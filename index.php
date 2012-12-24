@@ -17,7 +17,7 @@
  * Plugin Name:	Frankenkey
  * Plugin URI:	http://yoda.neun12.de
  * Description:	Adding keyboardshortcuts to the html editor
- * Version: 	0.1
+ * Version: 	0.3
  * Author: 		Ralf Albert
  * Author URI: 	http://yoda.neun12.de
  * Text Domain:
@@ -60,13 +60,20 @@ function frankenkey_starter(){
 		0
 	);
 
+	add_action(
+		'admin_print_styles',
+		'frankenkey_styles',
+		10,
+		0
+	);
+
 }
 
 function frankenkey_enqueue_javascript(){
 
 	wp_enqueue_script(
 		'mousetrap',
-		plugins_url( 'mousetrap.min.js', __FILE__ ),
+		plugins_url( 'js/mousetrap.min.js', __FILE__ ),
 		false,
 		false,
 		true
@@ -74,7 +81,7 @@ function frankenkey_enqueue_javascript(){
 
 	wp_enqueue_script(
 		'frankenkey-selection-jquery-plugin',
-		plugins_url( 'selection.js', __FILE__ ),
+		plugins_url( 'js/selection.js', __FILE__ ),
 		array( 'jquery' ),
 		false,
 		true
@@ -82,10 +89,21 @@ function frankenkey_enqueue_javascript(){
 
 	wp_enqueue_script(
 		'frankenkey',
-		plugins_url( 'frankenkey.js', __FILE__ ),
-		array( 'jquery', 'mousetrap', 'frankenkey-selection-jquery-plugin' ),
+		plugins_url( 'js/frankenkey.js', __FILE__ ),
+		array( 'jquery', 'jquery-ui-dialog', 'mousetrap', 'frankenkey-selection-jquery-plugin' ),
 		false,
 		true
 	);
 
+}
+
+function frankenkey_styles(){
+
+	wp_enqueue_style(
+		'frankenkey-dialog',
+		plugins_url( 'css/jquery-ui-dialog.css', __FILE__ ),
+		false,
+		false,
+		'screen'
+	);
 }
