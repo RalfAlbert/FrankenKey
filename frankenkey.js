@@ -10,226 +10,254 @@
 
 jQuery( document ).ready( function( $ ) {
 
-	/**
-	 * Textarea
-	 * jQuery object of the textarea where the shortcuts are binded to
-	 */
-	var container = $( '#content' );
+/**
+ * Textarea
+ * jQuery object of the textarea where the shortcuts are binded to
+ */
+var container = $( '#content' );
 
-	/**
-	 * Keymap
-	 * Object contains the shortcut and the internal action to do
-	 */
-	var keymap = {
-			'ctrl+alt+b':	'bold',
-			'ctrl+alt+i':	'italic',
-			'alt+q':		'blockquote',
-			'ctrl+alt+d':	'strike',
-			'ctrl+alt+s':	'ins',
-			'ctrl+alt+u':	'ul',
-			'ctrl+alt+o':	'ol',
-			'ctrl+alt+l':	'li',
-			'ctrl+alt+c':	'code',
+/**
+ * Keymap
+ * Object contains the shortcut and the internal action to do
+ * Format: keycombo -> action
+ */
+var keymap = {
+				// keycombos for inserting tags
+                'ctrl+b':	'bold',
+                'ctrl+i':	'italic',
+                'ctrl+q':	'blockquote',
+                'ctrl+d':	'strike',
+                'ctrl+s':	'ins',
+                'ctrl+u':	'ul',
+                'ctrl+o':	'ol',
+                'ctrl+l':	'li',
+                'ctrl+c':	'code',
 
-			'ctrl+alt+a':	'link',
-			'ctrl+alt+m':	'image',
-			'ctrl+alt+t':	'more',
-			'ctrl+alt+f':	'fullscreen',
+                // keycombos for simulated clicks (buttons & links)
+                'ctrl+alt+a':	'link',
+                'ctrl+m':		'image',
+                'ctrl+t':		'more',
+                'ctrl+f':		'fullscreen',
 
-			'ctrl+alt+h':	'help'
-	}; // end keymap
+                'ctrl+alt+s':	'savepost',
+                'ctrl+alt+p':	'preview',
+                'ctrl+alt+m':	'addmedia',
 
-	/**
-	 * Wrapping Tags
-	 * Selected content will be wrapped with these tags.
-	 */
-	var wrappingTags = {
+                // simple help window (alert)
+                'ctrl+alt+h':	'help'
+}; // end keymap
 
-			'bold':			'strong',
-			'italic':		'em',
-			'blockquote':	'blockquote',
-			'strike':		'del',
-			'ins':			'ins',
-			'ul':			'ul',
-			'ol':			'ol',
-			'li':			'li',
-			'code':			'code'
+/**
+ * Wrapping Tags
+ * Selected content will be wrapped with these tags.
+ * Format: keymap[action] -> tag
+ */
+var wrappingTags = {
 
-	}; // end wrappingTags
+                'bold':			'strong',
+                'italic':		'em',
+                'blockquote':	'blockquote',
+                'strike':		'del',
+                'ins':			'ins',
+                'ul':			'ul',
+                'ol':			'ol',
+                'li':			'li',
+                'code':			'code'
 
-	/**
-	 * Dialog buttons
-	 * These buttons did not wrap content, they start a dialog e.g. insert an image
-	 */
-	var dialogButtons = {
+}; // end wrappingTags
 
-			'link':			'link',
-			'img':			'img',
-			'more':			'more',
-			'fullscreen':	'fullscreen'
+/**
+ * Dialog buttons and links
+ * These buttons and links did not wrap content, they start a dialog or do an action e.g. insert an image
+ * If the button/link has an id, use '#'+the id. If it has no id, you can try to identify it by one
+ * of it's classes. In this case use '.'+class
+ * Format: keymap[action] -> element id
+ */
+var dialogButtons = {
 
-	}; // end dialogButtons
+                'link':			'#qt_content_link',
+                'image':		'#qt_content_img',
+                'more':			'#qt_content_more',
+                'fullscreen':	'#qt_content_fullscreen',
+                'savepost':		'#save-post',
+                'preview':		'#post-preview',
+                'addmedia':		'.add_media'
+
+}; // end dialogButtons
 
 
-	/**
-	 * FrankenKey
-	 * This is the part where the shortcuts will be transformed into an action
-	 * At first FrankenKey try to find a matching tag to wrap the content with or to open/close.
-	 * If there is no tag to use, it try to open a dialog (like insert an image)
-	 */
-	var FrankenKey = {
+/**
+ * FrankenKey
+ * This is the part where the shortcuts will be transformed into an action
+ * At first FrankenKey try to find a matching tag to wrap the content with or to open/close.
+ * If there is no tag to use, it try to open a dialog (like insert an image)
+ */
+var FrankenKey = {
 
-			/**
-			 * List with open tags
-			 * If a tag was open, openTags[tag] is set to true
-			 * If the tag was closed, openTags[tag] is set to false
-			 */
-			openTags: [],
+        /**
+         * List with open tags
+         * If a tag was open, openTags[tag] is set to true
+         * If the tag was closed, openTags[tag] is set to false
+         */
+        openTags: [],
 
-			keyFetcher: function( event, combo ) {
+        init: function () {
 
-				// prevent default browser behaviour
-				event.preventDefault();
+        	var fk = this;
 
-				// and finally stop all other handlers
-				event.stopPropagation();
+            /**
+             * Add class 'mousetrap' to bind Mousetrap to the textarea
+             */
+            container.addClass( 'mousetrap' );
 
-				try {
+            /**
+             * Mousetrap Bind Dictionary
+             * @see: https://gist.github.com/3154320
+             */
+            Mousetrap = ( function( Mousetrap ) {
 
-					method = keymap[combo];
+                var self = Mousetrap,
+                    _oldBind = self.bind,
+                    args;
 
-					if ( undefined !== wrappingTags[method] ) {
+                self.bind = function() {
 
-						this.wrapWithTags( wrappingTags[method] );
+                    args = arguments;
 
-					}
+                    // normal call
+                    if( ( typeof args[0] == 'string') || args[0] instanceof Array ) {
 
-					else if ( undefined !== dialogButtons[method] ){
+                        return _oldBind(args[0], args[1], args[2]);
 
-						this.clickButton( dialogButtons[method] );
-					}
+                    }
 
-					else if ( 'function' === typeof( this[method] ) ) {
-						this[method] ();
-					}
+                    // object passed in
+                    for( var key in args[0] ) {
 
-				}
-				// notify developers about failing to assign a keycombo to an action
-				catch( e ) {
-					console.log( e );
-				}
+                        if( args[0].hasOwnProperty( key ) ) {
 
-				finally {}
+                            _oldBind( key, function( event, combo ) { fk.keyFetcher( event, combo ); }, args[1] );
 
-				// prevent default keypress by returning false
-				return false;
+                        }
 
-			},
+                    }
 
-			wrapWithTags: function( tag ) {
+                    return true;
 
-				var startTag = '<' + tag + '>';
-				var endTag	 = '</' + tag + '>';
+                };
 
-				var selection = container.getSelection().text;
+                return self;
 
-				if( '' !== selection ) {
+            }) ( Mousetrap );
 
-					container.wrapSelection( startTag, endTag );
+            Mousetrap.bind( keymap );
 
-				} else {
+        },
 
-					oTag = this.openTags[tag];
+        keyFetcher: function( event, combo ) {
 
-					if( true !==  oTag ) {
+        	// if the focus isn't on the textarea (container), bail and return the event
+            if ( false === container.is( ':focus' ) ) {
 
-						this.openTags[tag] = true;
+               return event;
 
-						container.insertAtCaret( startTag );
+            }
 
-					} else {
+            // prevent default browser behaviour
+            event.preventDefault();
 
-						this.openTags[tag] = false;
+            // and finally stop all other handlers
+            event.stopPropagation();
 
-						container.insertAtCaret( endTag );
+            try {
 
-					}
+                    var action = keymap[combo];
 
-				}
+                    if ( undefined !== wrappingTags[action] ) {
 
-				return true;
+                    	this.wrapWithTags( wrappingTags[action] );
 
-			},
+                    }
 
-			clickButton: function( button ){
+                    else if ( undefined !== dialogButtons[action] ){
 
-				var tb = $( 'div#ed_toolbar' );
+                    	this.clickButton( dialogButtons[action] );
+                    }
 
-				tb.find( '#qt_content_' + button ).trigger( 'click' );
+                    else if ( 'function' === typeof( this[action] ) ) {
 
-			},
+                    	this[action] ();
 
-			help: function() {
+                    }
 
-				var str = '';
+            }
+            // notify developers about failing to assign a keycombo to an action
+            catch( e ) {
+                    console.log( e );
+            }
 
-				for( var key in keymap ) {
-					str += key + ' - ' + keymap[key] + "\n";
-				}
+            // prevent default keypress by returning false
+            return false;
 
-				alert( str );
+        },
 
-				return true;
-			}
+        wrapWithTags: function( tag ) {
+
+                var startTag = '<' + tag + '>';
+                var endTag	 = '</' + tag + '>';
+
+                var selection = container.getSelection().text;
+
+                if( '' !== selection ) {
+
+                        container.wrapSelection( startTag, endTag );
+
+                } else {
+
+                        oTag = this.openTags[tag];
+
+                        if( true !==  oTag ) {
+
+                                this.openTags[tag] = true;
+
+                                container.insertAtCaret( startTag );
+
+                        } else {
+
+                                this.openTags[tag] = false;
+
+                                container.insertAtCaret( endTag );
+
+                        }
+
+                }
+
+                return true;
+
+        },
+
+        clickButton: function( button_id ){
+
+        	$( document ).find( button_id ).trigger( 'click' );
+
+        },
+
+        help: function() {
+
+                var str = '';
+
+                for( var key in keymap ) {
+                        str += key + ' - ' + keymap[key] + "\n";
+                }
+
+                alert( str );
+
+                return true;
+        }
 
 
 	}; // end FrankenKey
 
-/* ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ */
-	/**
-	 * Add class 'mousetrap' to bind Mousetrap to the textarea
-	 */
-	container.addClass( 'mousetrap' );
+FrankenKey.init();
 
-	/**
-	 * Mousetrap Bind Dictionary
-	 * @see: https://gist.github.com/3154320
-	 */
-	Mousetrap = ( function( Mousetrap ) {
-
-	    var self = Mousetrap,
-	        _oldBind = self.bind,
-	        args;
-
-	    self.bind = function() {
-
-	        args = arguments;
-
-
-	        // normal call
-	        if( ( typeof args[0] == 'string') || args[0] instanceof Array ) {
-
-	            return _oldBind(args[0], args[1], args[2]);
-
-	        }
-
-	        // object passed in
-	        for( var key in args[0] ) {
-
-	            if( args[0].hasOwnProperty( key ) ) {
-
-	            	_oldBind( key, function( event, combo ) { FrankenKey.keyFetcher( event, combo ); }, args[1] );
-
-	            }
-
-	        }
-
-	    };
-
-	    return self;
-
-	}) ( Mousetrap );
-
-	Mousetrap.bind( keymap );
-
-});
+}); // end jQuery( document ).ready()
