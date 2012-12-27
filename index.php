@@ -253,7 +253,7 @@ function adminbar_menu(){
 	if( ! is_admin_bar_showing() || 'post' != $screen->base )
 		return;
 
-	$content = '<div id="frankenkey_toolbar_shortcuts">' . wp_nonce_field( $config->nonce_action_save_keycombo, $config->nonce_name, false, false ) . '</div>';
+	$content = '<div id="frankenkey_{what}_shortcuts">' . wp_nonce_field( $config->nonce_action_save_keycombo, $config->nonce_name, false, false ) . '</div>';
 
 	$wp_admin_bar->add_menu(
 		array(
@@ -265,12 +265,25 @@ function adminbar_menu(){
 
 	$wp_admin_bar->add_menu(
 			array(
-					'id'	=> 'frankenkey_content',
+					'id'	=> 'frankenkey_toolbar_content',
 					'parent' => 'frankenkey',
-					'title' => __( 'Editor Toolbar Buttons', $textdomain ) . $content,
+					'title' => __( 'Editor Toolbar Buttons', $textdomain ) . str_replace( '{what}', 'toolbar', $content ),
 					'href' => '#',
 					'meta' => array(
 							'class' => 'fk-tb-settings-open',
+							'onclick' => 'return false;'
+							)
+			)
+	);
+
+	$wp_admin_bar->add_menu(
+			array(
+					'id'	=> 'frankenkey_pagebuttons_content',
+					'parent' => 'frankenkey',
+					'title' => __( 'Page Buttons', $textdomain ) . str_replace( '{what}', 'pagebuttons', $content ),
+					'href' => '#',
+					'meta' => array(
+							'class' => 'fk-pb-settings-open',
 							'onclick' => 'return false;'
 							)
 			)

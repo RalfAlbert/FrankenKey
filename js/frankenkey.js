@@ -410,7 +410,11 @@ var FrankenKeyFinder = {
 	buttonKeymap: [],
 
 	settingsTB: $( '#frankenkey_toolbar_shortcuts' ),
-	settingsWindow: null,
+	settingsPB: $( '#frankenkey_pagebuttons_shortcuts' ),
+
+	settingsTBWindow: null,
+	settingsPBWindow: null,
+
 	nonce_name: 'frankenkey_nonce',
 
 	doc: $( document ),
@@ -462,7 +466,7 @@ var FrankenKeyFinder = {
 
 	},
 
-	findTBKeys: function ( id, element ) {
+	findTBButtons: function ( id, element ) {
 
 		if( null === this.fkfInit ){
 			this.init();
@@ -479,7 +483,7 @@ var FrankenKeyFinder = {
 
 				if( 0 < length ){
 					window.clearInterval( interval );
-					me._findTBKeys( id, element );
+					me._findTBButtons( id, element );
 				}
 			},
 			500
@@ -487,10 +491,9 @@ var FrankenKeyFinder = {
 
 	},
 
-	_findTBKeys: function( id, element ) {
+	_findTBButtons: function( id, element ) {
 
 		var me = this;
-
 		var keymap = this.buttonKeymap;
 
 		var table =
@@ -608,6 +611,10 @@ var FrankenKeyFinder = {
 
 	},
 
+	findPageButtons: function ( id, elements ) {
+
+	},
+
 	saveKeycombo: function ( element, extraData ) {
 
 		var nonce = $( '#'+this.nonce_name ).val();
@@ -671,7 +678,6 @@ var FrankenKeyFinder = {
 
 		var row = $( element ).parent().parent();
 
-//		row.find( '.fk-button-id' ).val( '' );
 		row.find( '.fk-keycombo' ).val( '' );
 		row.find( '.fk-button-desc' ).val( '' );
 
@@ -745,7 +751,7 @@ var FrankenKeyFinder = {
 
 };
 
-FrankenKeyFinder.findTBKeys( '#ed_toolbar', 'input' );
+FrankenKeyFinder.findTBButtons( '#ed_toolbar', 'input' );
 
 
 }); // end jQuery( document ).ready()
