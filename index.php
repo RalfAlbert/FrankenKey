@@ -44,30 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace FrankenKey;
 
-function do_mock(){
-
-	$fk_opts = get_option( 'frankenkey-keymap', array() );
-
-	$values = array();
-	$values['keycombo'] = 'ctrl+b';
-	$values['type']		= 'button';
-	$values['id']		= '#qt_content_strong';
-	$values['desc']		= 'Bold';
-
-	$fk_opts[$values['keycombo']] = json_encode( $values );
-
-	// 'ctrl+t':		{ 'type': 'button', 'id': '#qt_content_more', 'desc': 'Insert a more-tag' },
-	$values['keycombo'] = 'ctrl+t';
-	$values['type']		= 'button';
-	$values['id']		= '#qt_content_more';
-	$values['desc']		= 'Insert a more-tag';
-
-	$fk_opts[$values['keycombo']] = json_encode( $values );
-
-	update_option( 'frankenkey-keymap', $fk_opts );
-
-}
-
 add_action( 'plugins_loaded', 'FrankenKey\plugin_init', 10, 0 );
 
 register_activation_hook( __FILE__, 'FrankenKey\plugin_activation' );
@@ -75,8 +51,6 @@ register_deactivation_hook( __FILE__, 'FrankenKey\plugin_uninstall' );
 register_uninstall_hook( __FILE__, 'FrankenKey\plugin_uninstall' );
 
 function plugin_init(){
-
-//	do_mock();
 
 	add_action(
 		'wp_ajax_frankenkey_save_keycombo',
@@ -195,7 +169,10 @@ function get_keymap(){
 	$config = get_config();
 
 	$keymap_converted	= array();
-	$keymap_database	= get_option( $config->keymap, array() );
+	$keymap_database	= get_option( $config->keymap );
+
+	if( empty( $keymap_database ) )
+		$keymap_database = array();
 
 	foreach( $keymap_database as $id => $data ){
 
@@ -234,13 +211,13 @@ function enqueue_javascript(){
 		true
 	);
 
-	wp_enqueue_script(
-		'test-jquery-plugin',
-		plugins_url( 'js/test.js', __FILE__ ),
-		array( 'jquery', 'frankenkey' ),
-		false,
-		true
-	);
+// 	wp_enqueue_script(
+// 		'test-jquery-plugin',
+// 		plugins_url( 'js/test.js', __FILE__ ),
+// 		array( 'jquery', 'frankenkey' ),
+// 		false,
+// 		true
+// 	);
 
 	$translation = get_translation();
 
@@ -291,8 +268,11 @@ function adminbar_menu(){
 					'id'	=> 'frankenkey_content',
 					'parent' => 'frankenkey',
 					'title' => __( 'Editor Toolbar Buttons', $textdomain ) . $content,
-					'href' => '',
-					'meta' => array( 'class' => 'fk-settings-open' )
+					'href' => '#',
+					'meta' => array(
+							'class' => 'fk-tb-settings-open',
+							'onclick' => 'return false;'
+							)
 			)
 	);
 
@@ -328,7 +308,11 @@ function save_keycombo(){
 
 	global $wpdb;
 
-	$config = get_config();
+	$config	= get_config();
+	$keymap	= get_option( $config->keymap );
+
+	if( empty( $keymap ) )
+		$keymap = array();
 
 	$values = array();
 
@@ -339,11 +323,18 @@ function save_keycombo(){
 	// all shortcuts are in lowercase!
 	$values['keycombo']	= strtolower( $values['keycombo'] );
 
-	$fk_opts = get_option( $config->keymap, array() );
+	if( isset( $_POST['delete'] ) && true === (bool) $_POST['delete'] ){
 
-	$fk_opts[$values['id']] = json_encode( $values );
+		if( isset( $keymap[$values['id']] ) )
+			unset( $keymap[$values['id']] );
 
-	update_option( $config->keymap, $fk_opts );
+	} else {
+
+		$keymap[$values['id']] = json_encode( $values );
+
+	}
+
+	update_option( $config->keymap, $keymap );
 
 	die( true );
 

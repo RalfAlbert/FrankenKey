@@ -40,8 +40,10 @@ var FrankenKey = {
 		 * of it's classes. In this case use '.'+classname
 		 */
 		keymap:  {
-				'ctrl+alt+w':	{ 'type': 'wide', 'method': 'nothing', 'desc': 'test' },
-				'ctrl+alt+v':	{ 'method': 'nothing', 'desc': 'test' },
+
+						// debugging & testing
+						'ctrl+alt+w':	{ 'type': 'wide', 'method': 'nothing', 'desc': 'test' },
+						'ctrl+alt+v':	{ 'method': 'nothing', 'desc': 'test' },
 
 						// keycombos for inserting tags
 //						'ctrl+b':		{ 'type': 'tag', 'tag': 'strong', 'desc': 'Bold' },
@@ -592,23 +594,22 @@ var FrankenKeyFinder = {
 		);
 
 		$( '.fk-save-keycombo' ).click(
-			function () { me.saveKeycombo( this ); }
+			function () { me.saveKeycombo( this, false ); }
 		);
 
 		$( '.fk-del-keycombo' ).click(
 			function () { me.delKeycombo( this ); }
 		);
 
-		$( '.fk-settings-open' ).click(
+		$( '.fk-tb-settings-open' ).click(
 			function () { me.settingsWindow.dialog( 'open' ); }
 		);
 
 
 	},
 
-	saveKeycombo: function ( element ) {
+	saveKeycombo: function ( element, extraData ) {
 
-		var me = this;
 		var nonce = $( '#'+this.nonce_name ).val();
 		var row = $( element ).parent().parent();
 
@@ -626,6 +627,14 @@ var FrankenKeyFinder = {
 		};
 
 		data[this.nonce_name] = nonce;
+
+		if( false !== extraData ){
+			$.each( extraData,
+				function ( key, value ) {
+					data[key] = value;
+				}
+			);
+		}
 
 		$.post(
 				ajaxurl,
@@ -666,11 +675,13 @@ var FrankenKeyFinder = {
 
 		var row = $( element ).parent().parent();
 
-		row.find( '.fk-button-id' ).val( '' );
+//		row.find( '.fk-button-id' ).val( '' );
 		row.find( '.fk-keycombo' ).val( '' );
 		row.find( '.fk-button-desc' ).val( '' );
 
-		me.saveKeycombo( element );
+		var extraData = { 'delete': true };
+
+		me.saveKeycombo( element, extraData );
 
 		return true;
 
@@ -739,10 +750,6 @@ var FrankenKeyFinder = {
 };
 
 FrankenKeyFinder.findTBKeys( '#ed_toolbar', 'input' );
-
-//$( document ).find( '#contextual-help-link' ).trigger( 'click' );
-
-
 
 
 }); // end jQuery( document ).ready()
