@@ -613,17 +613,14 @@ var FrankenKeyFinder = {
 		var nonce = $( '#'+this.nonce_name ).val();
 		var row = $( element ).parent().parent();
 
-		var id			= row.find( '.fk-button-id' ).val();
-		var keycombo	= row.find( '.fk-keycombo' ).val();
-		var desc		= row.find( '.fk-button-desc' ).val();
-		var type		= 'button';
+		var type = 'button';
 
 		var data = {
 			'action':		'frankenkey_save_keycombo',
-			'fk-keycombo':	keycombo,
+			'fk-keycombo':	row.find( '.fk-keycombo' ).val(),
 			'fk-type':		type,
-			'fk-id':		id,
-			'fk-desc':		desc
+			'fk-id':		row.find( '.fk-button-id' ).val(),
+			'fk-desc':		row.find( '.fk-button-desc' ).val()
 		};
 
 		data[this.nonce_name] = nonce;
@@ -652,7 +649,6 @@ var FrankenKeyFinder = {
 					       .css( '-moz-transition', ease )
 					       .css( '-o-transition', ease )
 					       .css( '-ms-transition', ease )
-
 					       .css( 'backgroundColor', '#33CC00' ).delay( 900 ).queue(
 					    		 function() {
 					    			 $( this ).css( 'backgroundColor', 'transparent' );
