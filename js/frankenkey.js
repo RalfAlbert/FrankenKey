@@ -12,56 +12,53 @@ jQuery( document ).ready( function( $ ) {
 
 
 /**
- * Keymap
- * Object contains the shortcut and the internal action object
- * The action object has these propperties:
- *  - type: 	[tag|button|function]
- *  - tag:		Only if type is [tag]. The tag selected text is wrapped in or the tag to open/close
- *  - id:		Only if type is [button]. The element id (#id) or one of it's classes (.class)
- *  - method:	Only if type is [function]. A valid method of the FrankenKey object
- *  - desc:		(optional) A description, shown in the help window
- *
- * Dialog buttons and links
- * These buttons and links did not wrap content, they start a dialog or do an action e.g. insert an image
- * If the button/link has an id, use '#'+id. If it has no id, you can try to identify it by one
- * of it's classes. In this case use '.'+classname
- */
-var keymap = {
-		'ctrl+alt+w':	{ 'type': 'wide', 'method': 'nothing', 'desc': 'test' },
-		'ctrl+alt+v':	{ 'method': 'nothing', 'desc': 'test' },
-
-				// keycombos for inserting tags
-				'ctrl+b':		{ 'type': 'tag', 'tag': 'strong', 'desc': 'Bold' },
-                'ctrl+i':		{ 'type': 'tag', 'tag': 'em', 'desc': 'Emphasis (italic)' },
-                'ctrl+q':		{ 'type': 'tag', 'tag': 'blockquote', 'desc': 'Blockquote' },
-                'ctrl+d':		{ 'type': 'tag', 'tag': 'del', 'desc': 'Deleted text' },
-                'ctrl+s':		{ 'type': 'tag', 'tag': 'ins', 'desc': 'Inserted text' },
-                'ctrl+u':		{ 'type': 'tag', 'tag': 'ul', 'desc': 'Unordered list' },
-                'ctrl+o':		{ 'type': 'tag', 'tag': 'ol', 'desc': 'Ordered list' },
-                'ctrl+l':		{ 'type': 'tag', 'tag': 'li', 'desc': 'List element' },
-                'ctrl+c':		{ 'type': 'tag', 'tag': 'code', 'desc': 'Code' },
-
-                // keycombos for simulated clicks (buttons & links)
-				'ctrl+alt+a':	{ 'type': 'button', 'id': '#qt_content_link', 'desc': 'Insert a link' },
-                'ctrl+m':		{ 'type': 'button', 'id': '#qt_content_img', 'desc': 'Insert an image' },
-                'ctrl+t':		{ 'type': 'button', 'id': '#qt_content_more', 'desc': 'Insert a more-tag' },
-                'ctrl+f':		{ 'type': 'button', 'id': '#qt_content_fullscreen', 'desc': 'Switch to fullscreen mode' },
-
-				'ctrl+alt+s':	{ 'type': 'button', 'id': '#save-post', 'desc': 'Save post' },
-                'ctrl+alt+p':	{ 'type': 'button', 'id': '#post-preview', 'desc': 'Open post preview' },
-                'ctrl+alt+m':	{ 'type': 'button', 'id': '.add_media', 'desc': 'Add media' },
-
-                // simple help window (alert)
-				'ctrl+alt+h':	{ 'type': 'method', 'method': 'help', 'desc': 'Show help' },
-}; // end keymap
-
-/**
  * FrankenKey
  * This is the part where the shortcuts will be transformed into an action
  * At first FrankenKey try to find a matching tag to wrap the content with or to open/close.
  * If there is no tag to use, it try to open a dialog (like insert an image)
  */
 var FrankenKey = {
+
+		/**
+		 * Keymap
+		 * Object contains the shortcut and the internal action object
+		 * The action object has these propperties:
+		 *  - type: 	[tag|button|function]
+		 *  - tag:		Only if type is [tag]. The tag selected text is wrapped in or the tag to open/close
+		 *  - id:		Only if type is [button]. The element id (#id) or one of it's classes (.class)
+		 *  - method:	Only if type is [function]. A valid method of the FrankenKey object
+		 *  - desc:		(optional) A description, shown in the help window
+		 *
+		 * Dialog buttons and links
+		 * These buttons and links did not wrap content, they start a dialog or do an action e.g. insert an image
+		 * If the button/link has an id, use '#'+id. If it has no id, you can try to identify it by one
+		 * of it's classes. In this case use '.'+classname
+		 */
+		keymap: {
+			// keycombos for inserting tags
+			'ctrl+b':		{ 'type': 'tag', 'tag': 'strong', 'desc': 'Bold' },
+	        'ctrl+i':		{ 'type': 'tag', 'tag': 'em', 'desc': 'Emphasis (italic)' },
+	        'ctrl+q':		{ 'type': 'tag', 'tag': 'blockquote', 'desc': 'Blockquote' },
+	        'ctrl+d':		{ 'type': 'tag', 'tag': 'del', 'desc': 'Deleted text' },
+	        'ctrl+s':		{ 'type': 'tag', 'tag': 'ins', 'desc': 'Inserted text' },
+	        'ctrl+u':		{ 'type': 'tag', 'tag': 'ul', 'desc': 'Unordered list' },
+	        'ctrl+o':		{ 'type': 'tag', 'tag': 'ol', 'desc': 'Ordered list' },
+	        'ctrl+l':		{ 'type': 'tag', 'tag': 'li', 'desc': 'List element' },
+	        'ctrl+c':		{ 'type': 'tag', 'tag': 'code', 'desc': 'Code' },
+
+	        // keycombos for simulated clicks (buttons & links)
+			'ctrl+alt+a':	{ 'type': 'button', 'id': '#qt_content_link', 'desc': 'Insert a link' },
+	        'ctrl+m':		{ 'type': 'button', 'id': '#qt_content_img', 'desc': 'Insert an image' },
+	        'ctrl+t':		{ 'type': 'button', 'id': '#qt_content_more', 'desc': 'Insert a more-tag' },
+	        'ctrl+f':		{ 'type': 'button', 'id': '#qt_content_fullscreen', 'desc': 'Switch to fullscreen mode' },
+
+			'ctrl+alt+s':	{ 'type': 'button', 'id': '#save-post', 'desc': 'Save post' },
+	        'ctrl+alt+p':	{ 'type': 'button', 'id': '#post-preview', 'desc': 'Open post preview' },
+	        'ctrl+alt+m':	{ 'type': 'button', 'id': '.add_media', 'desc': 'Add media' },
+
+	        // simple help window (alert)
+			'ctrl+alt+h':	{ 'type': 'method', 'method': 'help', 'desc': 'Show help' },
+		}, // end keymap
 
 		/**
 		 * Textarea
@@ -128,7 +125,7 @@ var FrankenKey = {
 
             }) ( Mousetrap );
 
-            Mousetrap.bind( keymap );
+            Mousetrap.bind( this.keymap );
 
         },
 
@@ -178,9 +175,9 @@ var FrankenKey = {
             '    <tr><th>KeyCombo</th><th>Action</th></thead>' +
             '  <tbody>';
 
-            for( var key in keymap ) {
+            for( var key in this.keymap ) {
 
-            	var action = keymap[key];
+            	var action = this.keymap[key];
             	var keys = [];
             	var keystr = '';
 
@@ -239,7 +236,7 @@ var FrankenKey = {
 
             		var validActions =  [ 'tag', 'button', 'method' ];
 
-                    var action = keymap[combo];
+                    var action = this.keymap[combo];
                     var type = action.type;
 
                     if ( undefined !== type && ( 0 > $.inArray( type, validActions ) ) ) {

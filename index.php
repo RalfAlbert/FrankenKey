@@ -42,34 +42,33 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-add_action( 'plugins_loaded', 'frankenkey_starter', 10, 0 );
+namespace FrankenKey;
 
-function frankenkey_starter(){
+add_action( 'plugins_loaded', 'FrankenKey\plugin_init', 10, 0 );
 
-	add_action(
-		'admin_print_scripts-post-new.php',
-		'frankenkey_enqueue_javascript',
-		10,
-		0
-	);
+function plugin_init(){
 
-	add_action(
-		'admin_print_scripts-post.php',
-		'frankenkey_enqueue_javascript',
-		10,
-		0
-	);
+	foreach( array( 'post.php', 'post-new-php' ) as $page ){
 
-	add_action(
-		'admin_print_styles',
-		'frankenkey_styles',
-		10,
-		0
-	);
+		add_action(
+			'admin_print_scripts-' . $page,
+			'FrankenKey\enqueue_javascript',
+			10,
+			0
+		);
+
+		add_action(
+			'admin_print_styles-' . $page,
+			'FrankenKey\enqueue_styles',
+			10,
+			0
+		);
+
+	}
 
 }
 
-function frankenkey_enqueue_javascript(){
+function enqueue_javascript(){
 
 	wp_enqueue_script(
 		'mousetrap',
@@ -97,7 +96,7 @@ function frankenkey_enqueue_javascript(){
 
 }
 
-function frankenkey_styles(){
+function enqueue_styles(){
 
 	wp_enqueue_style(
 		'frankenkey-dialog',
@@ -106,4 +105,5 @@ function frankenkey_styles(){
 		false,
 		'screen'
 	);
+
 }
