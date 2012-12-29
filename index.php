@@ -42,15 +42,53 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+
+/**
+ * Namespace FrankenKey
+ * The main namespace
+ *
+ * @author Ralf
+ *
+ */
 namespace FrankenKey;
 
-add_action( 'plugins_loaded', 'FrankenKey\plugin_init', 10, 0 );
+/**
+ * Initialize the plugin when the plugins are loaded
+ */
+add_action(
+	'plugins_loaded',
+	'FrankenKey\plugin_init',
+	10,
+	0
+);
 
-register_activation_hook( __FILE__, 'FrankenKey\plugin_activation' );
-register_deactivation_hook( __FILE__, 'FrankenKey\plugin_uninstall' );
-register_uninstall_hook( __FILE__, 'FrankenKey\plugin_uninstall' );
+/**
+ * Register activation-, deactivation- and uninstall hooks
+ */
+register_activation_hook(
+	__FILE__,
+	'FrankenKey\plugin_activation'
+);
 
-function plugin_init(){
+register_deactivation_hook(
+	__FILE__,
+	'FrankenKey\plugin_deactivation'
+);
+
+register_uninstall_hook(
+	__FILE__,
+	'FrankenKey\plugin_uninstall'
+);
+
+/**
+ * Plugin initialisation
+ * Hook up all actions and filters
+ */
+function plugin_init() {
+
+	// bail if not in backend
+	if( ! is_admin() )
+		return false;
 
 	add_action(
 		'wp_ajax_frankenkey_save_keycombo',
@@ -90,35 +128,64 @@ function plugin_init(){
 
 }
 
-function plugin_activation(){
+/**
+ * Executed on plugin activation
+ */
+function plugin_activation() {
 
-	$config = get_config();
+	$optionkey = get_config( 'ok_keymap' );
 
-	add_option( $config->keymap );
-
-}
-
-function plugin_uninstall(){
-
-	$config = get_config();
-
-	delete_option( $config->keymap );
+	add_option( $optionkey );
 
 }
 
-function get_config(){
+/**
+ * Executed on plugin deactivation
+ */
+function deactivation() {
+
+	// for developing only !!!
+	//plugin_uninstall();
+
+}
+
+/**
+ * Executed on plugin uninstall
+ */
+function plugin_uninstall() {
+
+	$optionkey = get_config( 'ok_keymap' );
+
+	delete_option( $optionkey );
+
+}
+
+/**
+ * Get some basic configuration vars
+ * @param string $what (optional) Name of a single value to retrieve
+ * @return mixed Depending on the parameter $what return a single value (array, string, etc) or the complete configuration
+ */
+function get_config( $what = '' ) {
+
+	$what = filter_var( $what, FILTER_SANITIZE_STRING );
 
 	$config = new \stdClass();
-	$config->options	= 'frankenkey-options';
-	$config->keymap		= 'frankenkey-keymap';
-	$config->nonce_name	= 'frankenkey_nonce';
-	$config->nonce_action_save_keycombo = 'save_keycombo';
+	$config->ok_options		= 'frankenkey-options'; 		// optionkey (ok) for general options
+	$config->ok_keymap		= 'frankenkey-keymap';			// optionkey (ok) for keymap
+	$config->nonce_name		= 'frankenkey_nonce';			// nonce name, used in general
+	$config->nonce_action_save_keycombo = 'save_keycombo';	// nonce action, used in save-keycombo
 
-	return $config;
+	return ( ! empty( $what ) && isset( $config->$what ) ) ?
+		$config->$what : $config;
 
 }
 
-function get_translation( $what = false ){
+/**
+ * Get the plugin translation like translated strings, textdomain, etc.
+ * @param string $what (optional) Name of a single value to retrieve
+ * @return mixed Depending on the parameter $what return a single value (array, string, etc) or the complete translation
+ */
+function get_translation( $what = '' ){
 
 	$what = filter_var( $what, FILTER_SANITIZE_STRING );
 
@@ -139,6 +206,9 @@ function get_translation( $what = false ){
 			'fk_help'		=> __( 'FrankenKey Help', $translation->domain ),
 			'fk_settings'	=> __( 'FrankenKey Settings', $translation->domain ),
 
+			'init_translation_error'	=> __( 'Can not load translation.', $translation->domain ),
+			'init_keymap_error'			=> __( 'Can not load keymap.', $translation->domain ),
+
 			'action_not_defined'	=> __( 'Action <strong>{type}</strong> not defined', $translation->domain ),
 			'undefined_action'		=> __( 'Undefined action', $translation->domain ),
 			'error_msg'				=> __( 'Shortcut "<strong>{keycombo}</strong>" failed in case of bad shortcut definition.<br>', $translation->domain ),
@@ -147,29 +217,31 @@ function get_translation( $what = false ){
 			'settings_msg_2'		=> __( 'The page reload automatically after clicking OK!', $translation->domain )
 	);
 
-	switch( $what ){
-
-		case 'domain':
-			return $translation->domain;
-		break;
-
-		case 'strings':
-			return $translation->strings;
-		break;
-
-		default:
-			return $translation;
-		break;
-	}
+	return ( ! empty( $what ) && isset( $translation->$what ) ) ?
+		$translation->$what : $translation;
 
 }
 
-function get_keymap(){
+/**
+ * Prepare the keymap from database into a keymap for using in a JavaScript object
+ * In the database the unique key (identifier) for a keycombo is the html-id of the element
+ * which is triggered. The database-keymap need a unique idetifier to override old keycombos.
+ * In the JavaScript object there is no unique identifier. The key of each entry is the keycombo.
+ * The database-keymap have to be converted for using in a JavaScript object.
+ *
+ * @param string $what Whether to get the rwaw (unconverted) keymap or a converted keymap.
+ * @return array Converted keymap
+ */
+function get_keymap( $what = 'converted' ) {
 
-	$config = get_config();
+	$optionkey = get_config( 'ok_keymap' );
 
 	$keymap_converted	= array();
-	$keymap_database	= get_option( $config->keymap );
+	$keymap_database	= get_option( $optionkey );
+
+	// if the unconverted keymap is requested, return the database-keymap
+	if( 'converted' !== $what )
+		return $keymap_database;
 
 	if( empty( $keymap_database ) )
 		$keymap_database = array();
@@ -185,7 +257,36 @@ function get_keymap(){
 
 }
 
-function enqueue_javascript(){
+/**
+ * Store the keymap in database
+ * @param array $keymap
+ * @return bool False on error, otherwise true
+ */
+function set_keymap( $keymap = array() ) {
+
+	// do not test on empty array, otherwise no empty keymap is saved!
+	if( ! is_array( $keymap ) )
+		return false;
+
+	$test = maybe_serialize( $keymap );
+	$proof = '';
+
+	$optionkey = get_config( 'ok_keymap' );
+
+	update_option( $optionkey, $keymap );
+
+	$proof = maybe_serialize( get_option( $optionkey ) );
+
+	return ( $test === $proof ) ? true : false;
+
+}
+
+/**
+ * Enqueues the different JavaScripts
+ * Create the translation used in JavaScripts
+ * Create the keymap from database-keymap for using in JavaScript
+ */
+function enqueue_javascript() {
 
 	wp_enqueue_script(
 		'mousetrap',
@@ -211,17 +312,9 @@ function enqueue_javascript(){
 		true
 	);
 
-// 	wp_enqueue_script(
-// 		'test-jquery-plugin',
-// 		plugins_url( 'js/test.js', __FILE__ ),
-// 		array( 'jquery', 'frankenkey' ),
-// 		false,
-// 		true
-// 	);
+	$translation_strings = get_translation( 'strings' );
 
-	$translation = get_translation();
-
-	wp_localize_script( 'frankenkey', 'FrankenKeyTranslation', $translation->strings );
+	wp_localize_script( 'frankenkey', 'FrankenKeyTranslation', $translation_strings );
 
 	$keymap = get_keymap();
 
@@ -229,7 +322,10 @@ function enqueue_javascript(){
 
 }
 
-function enqueue_styles(){
+/**
+ * Enqueue different stylesheets
+ */
+function enqueue_styles() {
 
 	wp_enqueue_style(
 		'frankenkey-dialog',
@@ -240,10 +336,14 @@ function enqueue_styles(){
 	);
 }
 
-function adminbar_menu(){
+/**
+ * Add a menu to the admin bar
+ */
+function adminbar_menu() {
 
 	global $wp_admin_bar;
 
+	// need more than one value, get the complete config
 	$config = get_config();
 
 	$textdomain = get_translation( 'domain' );
@@ -276,21 +376,11 @@ function adminbar_menu(){
 			)
 	);
 
-	$wp_admin_bar->add_menu(
-			array(
-					'id'	=> 'frankenkey_pagebuttons_content',
-					'parent' => 'frankenkey',
-					'title' => __( 'Page Buttons', $textdomain ) . str_replace( '{what}', 'pagebuttons', $content ),
-					'href' => '#',
-					'meta' => array(
-							'class' => 'fk-pb-settings-open',
-							'onclick' => 'return false;'
-							)
-			)
-	);
-
 }
 
+/**
+ * Add a help tab
+ */
 function help_tab(){
 
 	$screen = get_current_screen();
@@ -304,12 +394,18 @@ function help_tab(){
 
 }
 
+/**
+ * The content outputted in help tab
+ */
 function help_content(){
 
 	echo '<div id="frankenkey_help_tab">Some usefull help.</div>';
 
 }
 
+/**
+ * Ajax callback to save a keycombo
+ */
 function save_keycombo(){
 
 	$config = get_config();
@@ -319,10 +415,7 @@ function save_keycombo(){
 	if ( empty( $_POST ) || ! wp_verify_nonce( $nonce_name, $config->nonce_action_save_keycombo ) )
 		die( 'Uh! Oh! Not allowed!' );
 
-	global $wpdb;
-
-	$config	= get_config();
-	$keymap	= get_option( $config->keymap );
+	$keymap	= get_keymap( 'database' );
 
 	if( empty( $keymap ) )
 		$keymap = array();
@@ -336,7 +429,9 @@ function save_keycombo(){
 	// all shortcuts are in lowercase!
 	$values['keycombo']	= strtolower( $values['keycombo'] );
 
-	if( isset( $_POST['delete'] ) && true === (bool) $_POST['delete'] ){
+	$delete = filter_input( INPUT_POST, 'delete', FILTER_VALIDATE_BOOLEAN );
+
+	if( true === $delete ) {
 
 		if( isset( $keymap[$values['id']] ) )
 			unset( $keymap[$values['id']] );
@@ -347,9 +442,10 @@ function save_keycombo(){
 
 	}
 
-	update_option( $config->keymap, $keymap );
+	$success = set_keymap( $keymap );
 
-	die( true );
+	header( "Content-type: text/javascript" );
+	die( $success );
 
 }
 

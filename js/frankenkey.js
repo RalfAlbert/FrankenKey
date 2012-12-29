@@ -22,7 +22,7 @@ var FrankenKey = {
 		/**
 		 * Container for translated strings
 		 */
-		trans: null,
+		trans: {},
 
 		/**
 		 * Keymap
@@ -42,8 +42,8 @@ var FrankenKey = {
 		keymap:  {
 
 						// debugging & testing
-						'ctrl+alt+w':	{ 'type': 'wide', 'method': 'nothing', 'desc': 'test' },
-						'ctrl+alt+v':	{ 'method': 'nothing', 'desc': 'test' },
+//						'ctrl+alt+w':	{ 'type': 'wide', 'method': 'nothing', 'desc': 'test' },
+//						'ctrl+alt+v':	{ 'method': 'nothing', 'desc': 'test' },
 
 						// keycombos for inserting tags
 //						'ctrl+b':		{ 'type': 'tag', 'tag': 'strong', 'desc': 'Bold' },
@@ -83,12 +83,20 @@ var FrankenKey = {
          */
         openTags: [],
 
+        /**
+         * If something went wrong while initialisation
+         */
+        initErrors: {},
+
+        /**
+         * Initialisation
+         */
         init: function () {
 
         	// needed for binding the keycombos
         	var frankenkey = this;
 
-        	this.trans = ( undefined !== FrankenKeyTranslation ) ?
+        	frankenkey.trans = ( undefined !== FrankenKeyTranslation ) ?
         		FrankenKeyTranslation : null;
 
         	// get the keymap from database (stored as script in the DOM)
@@ -108,7 +116,54 @@ var FrankenKey = {
 
         	}
 
+        	/**
+        	 * Early aborting if neccassary things was not initialized
+        	 */
 
+        	// check if translation was initialized
+        	if( 'object' !== typeof( frankenkey.trans ) || null === frankenkey.trans ) {
+
+        		frankenkey.trans = {};
+
+        		frankenkey.trans.init_translation_error = 'Can not load translation.';
+        		frankenkey.trans.init_keymap_error = 'Can not load keymap.';
+
+        		frankenkey.initErrors.translation = frankenkey.trans.init_translation_error;
+
+        	}
+
+        	// check if the keymap was initialized
+        	if( 'object' !== typeof( FrankenKeyKeymap ) || null === FrankenKeyKeymap ) {
+
+        		frankenkey.initErrors.keymap = frankenkey.trans.init_keymap_error;
+
+        	}
+
+        	// check if any errors occured
+        	if( undefined !== frankenkey.initErrors.length ) {
+
+        		var errorOutput = '';
+
+        		$.each(
+        			frankenkey.initErrors,
+        			function ( error, message ) {
+
+        				errorOutput += message + "\n";
+        			}
+        		);
+
+        		errorOutput += "\nAborting FrankenKey!";
+
+        		alert( errorOutput );
+
+        		return false;
+
+        	}
+
+
+        	/**
+        	 * Create jQuery dialog boxes for nicer messages and so on
+        	 */
         	this.createDialogboxes();
 
             /**
@@ -160,6 +215,9 @@ var FrankenKey = {
 
         },
 
+        /**
+         * initialize jQuery dialog boxes for error messages and settings windows
+         */
         createDialogboxes: function(){
 
         	// common options for dialog boxes
@@ -253,6 +311,13 @@ var FrankenKey = {
 
         },
 
+        /**
+         * Keyfetcher is the core component of FrankenKey
+         * KeyFetcher observe the keyboard and trigger the actions depending on the current keypress
+         * @param event Window event
+         * @param combo Keyboardshortcut such as ctrl+b, ctrl+alt+h, etc
+         * @returns false to prevent default browser behavior
+         */
         keyFetcher: function( event, combo ) {
 
         	// if the focus isn't on the textarea (container), bail and return the event
@@ -335,6 +400,14 @@ var FrankenKey = {
 
         },
 
+        /**
+         * Wrapping selected text with tags or open a tag if no text is selected.
+         * If a tag already was opened, wrapWithTags close the open tag.
+         * WORKS ONLY WITH HTML tags!!
+         *
+         * @param tag Tag which the text will be wrapped with / to open or close
+         * @returns boolean Always true
+         */
         wrapWithTags: function( tag ) {
 
                 var startTag = '<' + tag + '>';
@@ -348,9 +421,7 @@ var FrankenKey = {
 
                 } else {
 
-                        oTag = this.openTags[tag];
-
-                        if( true !==  oTag ) {
+                        if( true !== this.openTags[tag] ) {
 
                                 this.openTags[tag] = true;
 
@@ -370,12 +441,21 @@ var FrankenKey = {
 
         },
 
+        /**
+         * Trigger a click on a button, link, etc
+         *
+         * @param button_id HTML ID of the element which should be clicked
+         */
         clickButton: function( button_id ){
 
         	$( document ).find( button_id ).trigger( 'click' );
 
         },
 
+        /**
+         * Helper function to open the help window
+         * @returns boolean Always true
+         */
         help: function() {
 
                 this.help_confirm.dialog( 'open' );
@@ -407,6 +487,9 @@ var FrankenKeyFinder = {
 	 */
 	trans: null,
 
+	/**
+	 * Container for keymap
+	 */
 	buttonKeymap: [],
 
 	settingsTB: $( '#frankenkey_toolbar_shortcuts' ),
@@ -617,7 +700,9 @@ var FrankenKeyFinder = {
 
 	saveKeycombo: function ( element, extraData ) {
 
-		var nonce = $( '#'+this.nonce_name ).val();
+		var me = this;
+
+		var nonce = $( '#'+me.nonce_name ).val();
 		var row = $( element ).parent().parent();
 
 		var type = 'button';
@@ -630,7 +715,7 @@ var FrankenKeyFinder = {
 			'fk-desc':		row.find( '.fk-button-desc' ).val()
 		};
 
-		data[this.nonce_name] = nonce;
+		data[me.nonce_name] = nonce;
 
 		if( false !== extraData ){
 			$.each( extraData,
