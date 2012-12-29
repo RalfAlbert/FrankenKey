@@ -3,8 +3,8 @@
  *
  * @package FrankenKey
  * @author Ralf Albert
- * @version 0.4
- * @date 2012-12-22
+ * @version 0.4-beta
+ * @date 2012-12-29
  *
  */
 

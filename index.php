@@ -9,7 +9,8 @@
  * @subpackage FrankenKey
  * @author     Ralf Albert <me@neun12.de>
  * @license    GPLv3 http://www.gnu.org/licenses/gpl-3.0.txt
- * @version    0.1
+ * @version    0.4-beta
+ * @date	   20112-12-29
  * @link       http://wordpress.com
  */
 
@@ -17,7 +18,7 @@
  * Plugin Name:	Frankenkey
  * Plugin URI:	http://yoda.neun12.de
  * Description:	Adding keyboardshortcuts to the html editor
- * Version: 	0.4
+ * Version: 	0.4-beta
  * Author: 		Ralf Albert
  * Author URI: 	http://yoda.neun12.de
  * Text Domain:
@@ -47,7 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  * Namespace FrankenKey
  * The main namespace
  *
- * @author Ralf
+ * @author Ralf Albert
  *
  */
 namespace FrankenKey;
