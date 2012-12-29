@@ -196,6 +196,8 @@ function get_translation( $what = '' ){
 
 	$translation->strings = array(
 
+			'ok'			=> __( 'OK', $translation->domain ),
+			'cancel'		=> __( 'Cancel', $translation->domain ),
 			'help'			=> __( 'Help', $translation->domain ),
 			'button'		=> __( 'Button', $translation->domain ),
 			'shortcut'		=> __( 'Shortcut', $translation->domain ),

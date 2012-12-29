@@ -227,13 +227,11 @@ var FrankenKey = {
 					hide:		true,
 				    modal:		false,
 				    autoOpen:	false,
-				    buttons:	{
-				        			Ok: function() {
-				        				$( this ).dialog( "close" );
-				        			}
-				    			}
+				    buttons:	{}
 
         	};
+
+        	confirm_window_options.buttons[this.trans.ok]		= function() { $( this ).dialog( "close" ); };
 
 			/*
 			 * Create a dialog box for error messages
@@ -664,12 +662,22 @@ var FrankenKeyFinder = {
 				hide:		true,
 				modal:		false,
 				autoOpen:	false,
-				buttons:	{
-					Ok:		function () { $( this ).dialog( "close" ); window.location.reload(); },
-					Cancel:	function () { $( this ).dialog( "close" ); }
-				}
+				buttons:	{}
 
 	    	}
+		);
+
+		this.settingsWindow.dialog(
+				'option',
+				'buttons',
+				[
+				 { text: this.trans.ok,
+					click: function() { $( this ).dialog( "close" ); window.location.reload(); }
+				 },
+				 { text: this.trans.cancel,
+						click: function() { $( this ).dialog( "close" ); }
+				 }
+				]
 		);
 
 
