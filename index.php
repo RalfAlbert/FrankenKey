@@ -2,7 +2,7 @@
 /**
  * WordPress-Plugin FrankenKey
  *
- * PHP version 5.2
+ * PHP version 5.3
  *
  * @category   PHP
  * @package    WordPress
