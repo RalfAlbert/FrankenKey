@@ -23,6 +23,16 @@ After installing the plugin, you will find a new menu in the admin bar. Within t
 ##Getting help##
 Press `[ctrl]` + `[alt]` + `[h]` while the focus is on the text editor to see an overview of all defined shortcuts. This shortcut is predefined and can not be changed. You can override this shortcut, but after this, you can't open the overview!
 
+##Tested with##
+**OS: Windows7 64Bit**
+
+ - Internet Explorer 9.0.8112.16421 UV: 9.0.12 (KB2761465)
+ - Internet Explorer 64-bit Edition 9.0.8112.16421 UV: 9.0.12 (KB2761465)
+ - Google Chrome Version 23.0.1271.97 m
+ - Opera 12.12 ( Opera/9.80 (Windows NT 6.1; WOW64) Presto/2.12.388 Version/12.12 )
+ - FireFox 17.0.1
+
+
 ##Branches##
 You will find three branches in this repository. Master, stable and beta. This project is a continous develop project. It means, from time to time new features will be released.
 
