@@ -10,17 +10,17 @@ Like Dr. Frankenstein who build his own man, FrankenKey allow you to build up yo
 ###Install###
 Install the plugin like all other WordPress plugins. Download the zip-archive, decompress it, upload the folder to your plugin-directory. Activate the plugin and write a new post/page or edit an existing one. You should see a new menu in the admin bar called 'FrankenKey'.
 
-##Use it###
+###Use it###
 While the focus (you can see a blinking dash) is on the text editor, press one of the shortcuts you defined. The shortcuts are only available as long as the focus is on the text editor. This is neccessary to avoid conflicts with default browser shortcuts.
 
-##Adding shortcuts###
+###Adding shortcuts###
 After installing the plugin, you will find a new menu in the admin bar. Within this menu, you find one (or in a later version, more than one) submenu. Click on the submenu and a popup window should be open. A table with all available buttons should be displayed. While you hover one of the table rows, the button will be highlighted. Add a shortcut and an optional description, click on 'save'.
 
 **If you delete a shortcut, the shortcut will be deleted immediately! There is no confirmation or rescue!**
 
 **After closing the popup window with a click on 'OK', the page will be reloaded!** This is neccessary to reload the shortcuts and get them active. If you close the popup window with 'Cancel', the shortcuts are saved, but are not active!
 
-##Getting help##
+###Getting help###
 Press `[ctrl]` + `[alt]` + `[h]` while the focus is on the text editor to see an overview of all defined shortcuts. This shortcut is predefined and can not be changed. You can override this shortcut, but after this, you can't open the overview!
 
 ##Tested with##
