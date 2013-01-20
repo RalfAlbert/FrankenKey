@@ -56,28 +56,28 @@ namespace FrankenKey;
  * Initialize the plugin when the plugins are loaded
  */
 add_action(
-	'plugins_loaded',
-	'FrankenKey\plugin_init',
-	10,
-	0
+    'plugins_loaded',
+    'FrankenKey\plugin_init',
+    10,
+    0
 );
 
 /**
  * Register activation-, deactivation- and uninstall hooks
  */
 register_activation_hook(
-	__FILE__,
-	'FrankenKey\plugin_activation'
+    __FILE__,
+    'FrankenKey\plugin_activation'
 );
 
 register_deactivation_hook(
-	__FILE__,
-	'FrankenKey\plugin_deactivation'
+    __FILE__,
+    'FrankenKey\plugin_deactivation'
 );
 
 register_uninstall_hook(
-	__FILE__,
-	'FrankenKey\plugin_uninstall'
+    __FILE__,
+    'FrankenKey\plugin_uninstall'
 );
 
 /**
@@ -91,39 +91,37 @@ function plugin_init() {
 		return false;
 
 	add_action(
-		'wp_ajax_frankenkey_save_keycombo',
-		'FrankenKey\save_keycombo'
+	    'wp_ajax_frankenkey_save_keycombo',
+	    'FrankenKey\save_keycombo'
 	);
 
-	foreach( array( 'post.php', 'post-new.php' ) as $page ){
-
+	foreach ( array( 'post.php', 'post-new.php' ) as $page ){
 		add_action(
-			'admin_print_scripts-' . $page,
-			'FrankenKey\enqueue_javascript',
-			10,
-			1
+		    'admin_print_scripts-' . $page,
+		    'FrankenKey\enqueue_javascript',
+		    10,
+		    1
 		);
 
 		add_action(
-			'admin_print_styles-' . $page,
-			'FrankenKey\enqueue_styles',
-			10,
-			0
+		    'admin_print_styles-' . $page,
+		    'FrankenKey\enqueue_styles',
+		    10,
+		    0
 		);
 
 		add_action(
-			'admin_bar_menu',
-			'FrankenKey\adminbar_menu',
-			999
+		    'admin_bar_menu',
+		    'FrankenKey\adminbar_menu',
+		    999
 		);
 
 		add_action(
-			'load-' . $page,
-			'FrankenKey\help_tab',
-			10,
-			0
+		    'load-' . $page,
+		    'FrankenKey\help_tab',
+		    10,
+		    0
 		);
-
 	}
 
 }
@@ -238,8 +236,8 @@ function get_keymap( $what = 'converted' ) {
 
 	$optionkey = get_config( 'ok_keymap' );
 
-	$keymap_converted	= array();
-	$keymap_database	= get_option( $optionkey );
+	$keymap_converted = array();
+	$keymap_database  = get_option( $optionkey );
 
 	// if the unconverted keymap is requested, return the database-keymap
 	if( 'converted' !== $what )
@@ -248,11 +246,9 @@ function get_keymap( $what = 'converted' ) {
 	if( empty( $keymap_database ) )
 		$keymap_database = array();
 
-	foreach( $keymap_database as $id => $data ){
-
+	foreach ( $keymap_database as $id => $data ){
 		$decoded = json_decode( $data, true );
 		$keymap_converted[$decoded['keycombo']] = $data;
-
 	}
 
 	return $keymap_converted;
@@ -270,7 +266,7 @@ function set_keymap( $keymap = array() ) {
 	if( ! is_array( $keymap ) )
 		return false;
 
-	$test = maybe_serialize( $keymap );
+	$test  = maybe_serialize( $keymap );
 	$proof = '';
 
 	$optionkey = get_config( 'ok_keymap' );
@@ -291,27 +287,27 @@ function set_keymap( $keymap = array() ) {
 function enqueue_javascript() {
 
 	wp_enqueue_script(
-		'mousetrap',
-		plugins_url( 'js/mousetrap.min.js', __FILE__ ),
-		false,
-		false,
-		true
+	    'mousetrap',
+	    plugins_url( 'js/mousetrap.min.js', __FILE__ ),
+	    false,
+	    false,
+	    true
 	);
 
 	wp_enqueue_script(
-		'frankenkey-selection-jquery-plugin',
-		plugins_url( 'js/selection.js', __FILE__ ),
-		array( 'jquery' ),
-		false,
-		true
+	    'frankenkey-selection-jquery-plugin',
+	    plugins_url( 'js/selection.js', __FILE__ ),
+	    array( 'jquery' ),
+	    false,
+	    true
 	);
 
 	wp_enqueue_script(
-		'frankenkey',
-		plugins_url( 'js/frankenkey.js', __FILE__ ),
-		array( 'jquery', 'jquery-ui-dialog', 'mousetrap', 'frankenkey-selection-jquery-plugin' ),
-		false,
-		true
+	    'frankenkey',
+	    plugins_url( 'js/frankenkey.js', __FILE__ ),
+	    array( 'jquery', 'jquery-ui-dialog', 'mousetrap', 'frankenkey-selection-jquery-plugin' ),
+	    false,
+	    true
 	);
 
 	$translation_strings = get_translation( 'strings' );
@@ -330,11 +326,11 @@ function enqueue_javascript() {
 function enqueue_styles() {
 
 	wp_enqueue_style(
-		'frankenkey-dialog',
-		plugins_url( 'css/jquery-ui-dialog.css', __FILE__ ),
-		false,
-		false,
-		'screen'
+	    'frankenkey-dialog',
+	    plugins_url( 'css/jquery-ui-dialog.css', __FILE__ ),
+	    false,
+	    false,
+	    'screen'
 	);
 }
 
@@ -358,23 +354,23 @@ function adminbar_menu() {
 	$content = '<div id="frankenkey_{what}_shortcuts">' . wp_nonce_field( $config->nonce_action_save_keycombo, $config->nonce_name, false, false ) . '</div>';
 
 	$wp_admin_bar->add_menu(
-		array(
-				'id' => 'frankenkey',
-				'title' => __( 'Frankenkey', $textdomain ),
-				'href' => false
-		)
+     array(
+        'id' => 'frankenkey',
+        'title' => __( 'Frankenkey', $textdomain ),
+        'href' => false,
+     )
 	);
 
 	$wp_admin_bar->add_menu(
-			array(
-					'id'	=> 'frankenkey_toolbar_content',
-					'parent' => 'frankenkey',
-					'title' => __( 'Editor Toolbar Buttons', $textdomain ) . str_replace( '{what}', 'toolbar', $content ),
-					'href' => '#',
-					'meta' => array(
-							'class' => 'fk-tb-settings-open',
-							'onclick' => 'return false;'
-							)
+     array(
+        'id'	=> 'frankenkey_toolbar_content',
+        'parent' => 'frankenkey',
+        'title' => __( 'Editor Toolbar Buttons', $textdomain ) . str_replace( '{what}', 'toolbar', $content ),
+        'href' => '#',
+        'meta' => array(
+        		'class' => 'fk-tb-settings-open',
+        		'onclick' => 'return false;',
+        		)
 			)
 	);
 
@@ -387,12 +383,14 @@ function help_tab(){
 
 	$screen = get_current_screen();
 
-	$screen->add_help_tab( array(
-			'id'		=> 'frankenkey',
-			'title'		=> 'FrankenKey',
-			'content'	=> '<h3>FrankenKey</h3>',
-			'callback'	=> 'FrankenKey\help_content'
-	) );
+	$screen->add_help_tab(
+     array(
+        'id'		=> 'frankenkey',
+        'title'		=> 'FrankenKey',
+        'content'	=> '<h3>FrankenKey</h3>',
+        'callback'	=> 'FrankenKey\help_content',
+	 )
+	);
 
 }
 
@@ -424,29 +422,25 @@ function save_keycombo(){
 
 	$values = array();
 
-	$values['keycombo']	= filter_input( INPUT_POST, 'fk-keycombo', FILTER_SANITIZE_STRING );
-	$values['type']		= filter_input( INPUT_POST, 'fk-type', FILTER_SANITIZE_STRING );
-	$values['id']		= filter_input( INPUT_POST, 'fk-id', FILTER_SANITIZE_STRING );
-	$values['desc']		= filter_input( INPUT_POST, 'fk-desc', FILTER_SANITIZE_STRING );
+	$values['keycombo'] = filter_input( INPUT_POST, 'fk-keycombo', FILTER_SANITIZE_STRING );
+	$values['type']     = filter_input( INPUT_POST, 'fk-type', FILTER_SANITIZE_STRING );
+	$values['id']       = filter_input( INPUT_POST, 'fk-id', FILTER_SANITIZE_STRING );
+	$values['desc']     = filter_input( INPUT_POST, 'fk-desc', FILTER_SANITIZE_STRING );
 	// all shortcuts are in lowercase!
 	$values['keycombo']	= strtolower( $values['keycombo'] );
 
 	$delete = filter_input( INPUT_POST, 'delete', FILTER_VALIDATE_BOOLEAN );
 
-	if( true === $delete ) {
-
+	if ( true === $delete ) {
 		if( isset( $keymap[$values['id']] ) )
 			unset( $keymap[$values['id']] );
-
 	} else {
-
 		$keymap[$values['id']] = json_encode( $values );
-
 	}
 
 	$success = set_keymap( $keymap );
 
-	header( "Content-type: text/javascript" );
+	header( 'Content-type: text/javascript' );
 	die( $success );
 
 }
